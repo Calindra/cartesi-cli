@@ -15,8 +15,39 @@ services:
     validator:
         environment:
             CARTESI_FEATURE_INPUT_READER_ENABLED: false
+    espresso_reader_migrate:
+        image: golang:1.23
+        command:
+            - /bin/bash
+            - -c
+            - |
+                git clone --depth 1 https://github.com/cartesi/rollups-espresso-reader.git --branch v0.2.1-node-20250128
+                cd rollups-espresso-reader
+                make migrate
+        env_file:
+            - ${CARTESI_BIN_PATH}/node/default.env
+        depends_on:
+            database:
+                condition: service_healthy
+        environment:
+            DATABASE_URL: postgres://postgres:password@database:5432/espresso_reader
+
+    espresso_reader:
+        image: cartesi/sdk:devel
+        command: "cartesi-rollups-espresso-reader"
+        depends_on:
+            espresso_reader_migrate:
+                condition: service_completed_successfully
+        env_file:
+            - ${CARTESI_BIN_PATH}/node/default.env
+        environment:
+            DATABASE_URL: postgres://postgres:password@database:5432/espresso_reader
+            ESPRESSO_BASE_URL: http://espresso:8770
+            ESPRESSO_NAMESPACE: 51025
+            ESPRESSO_STARTING_BLOCK: 101
+
     espresso:
-        image: cartesi/sdk:0.12.0-alpha.3
+        image: cartesi/sdk:0.12.0-alpha.5
         command: ["/usr/local/bin/espresso-dev-node"]
         deploy:
             resources:
@@ -33,6 +64,8 @@ services:
                 condition: service_completed_successfully
             database:
                 condition: service_healthy
+            anvil:
+                condition: service_healthy
         environment:
             ESPRESSO_SEQUENCER_L1_PROVIDER: ${CARTESI_BLOCKCHAIN_HTTP_ENDPOINT:-http://anvil:8545}
             ESPRESSO_SEQUENCER_API_PORT: 8770
@@ -45,6 +78,11 @@ services:
             ESPRESSO_SEQUENCER_POSTGRES_PASSWORD: password
             ESPRESSO_SEQUENCER_POSTGRES_DATABASE: sequencer
             ESPRESSO_SEQUENCER_ETH_MNEMONIC: ${CARTESI_AUTH_MNEMONIC:-test test test test test test test test test test test junk}
+            ESPRESSO_STATE_PROVER_UPDATE_INTERVAL: "1s"
+            ESPRESSO_STATE_PROVER_RETRY_INTERVAL: "500ms"
+            ESPRESSO_BASE_URL: http://espresso:8770
+            ESPRESSO_NAMESPACE: 51025
+            ESPRESSO_STARTING_BLOCK: 101
 
     prompt:
         image: debian:bookworm-slim
