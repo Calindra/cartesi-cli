@@ -38,6 +38,8 @@ services:
         depends_on:
             espresso_reader_migrate:
                 condition: service_completed_successfully
+            espresso:
+                condition: service_healthy
         env_file:
             - ${CARTESI_BIN_PATH}/node/default.env
         environment:
@@ -49,6 +51,17 @@ services:
     espresso:
         image: cartesi/sdk:0.12.0-alpha.5
         command: ["/usr/local/bin/espresso-dev-node"]
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "curl",
+                    "-f",
+                    "http://localhost:8770/v0/status/block-height",
+                ]
+            interval: 10s
+            timeout: 1s
+            retries: 5
         deploy:
             resources:
                 limits:
