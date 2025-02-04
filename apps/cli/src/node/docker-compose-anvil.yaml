@@ -35,14 +35,17 @@ services:
                 "0x4C11C7F82D6D56a726f9B53dd99af031AFd86BB6",
                 "deployContracts(address,address,bytes32,bytes32)",
                 "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-                "720",
                 "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
                 "0x0000000000000000000000000000000000000000000000000000000000000000",
             ]
 
     prompt:
-        image: debian:bookworm-slim
+        depends_on:
+            anvil:
+                condition: service_healthy
+            dapp_deployer:
+                condition: service_completed_successfully
         environment:
             PROMPT_TXT_01_ANVIL: "Anvil running at http://localhost:8545"
 
