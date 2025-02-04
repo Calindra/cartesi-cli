@@ -93,9 +93,6 @@ services:
             ESPRESSO_SEQUENCER_ETH_MNEMONIC: ${CARTESI_AUTH_MNEMONIC:-test test test test test test test test test test test junk}
             ESPRESSO_STATE_PROVER_UPDATE_INTERVAL: "1s"
             ESPRESSO_STATE_PROVER_RETRY_INTERVAL: "500ms"
-            ESPRESSO_BASE_URL: http://espresso:8770
-            ESPRESSO_NAMESPACE: 51025
-            ESPRESSO_STARTING_BLOCK: 101
 
     prompt:
         image: debian:bookworm-slim
