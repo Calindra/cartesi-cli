@@ -2,3 +2,9 @@ services:
     validator:
         env_file:
             - ./.cartesi.env
+    espresso_reader:
+        env_file:
+            - ./.cartesi.env
+    espresso:
+        env_file:
+            - ./.cartesi.env
