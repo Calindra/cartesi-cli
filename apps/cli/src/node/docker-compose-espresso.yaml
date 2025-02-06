@@ -15,6 +15,7 @@ services:
     validator:
         environment:
             CARTESI_FEATURE_INPUT_READER_ENABLED: false
+
     espresso_reader_migrate:
         image: golang:1.23
         command:
@@ -35,6 +36,8 @@ services:
     espresso_reader:
         image: cartesi/sdk:0.12.0-alpha.6
         command: "cartesi-rollups-espresso-reader"
+        ports:
+            - 8081
         depends_on:
             espresso_reader_migrate:
                 condition: service_completed_successfully
@@ -43,7 +46,7 @@ services:
         env_file:
             - ${CARTESI_BIN_PATH}/node/default.env
         environment:
-            DATABASE_URL: postgres://postgres:password@database:5432/espresso_reader
+            ESPRESSO_SERVICE_ENDPOINT: ":8081"
             ESPRESSO_BASE_URL: http://espresso:8770
             ESPRESSO_NAMESPACE: 51025
             ESPRESSO_STARTING_BLOCK: 101
@@ -171,3 +174,22 @@ services:
                             loadBalancer:
                                 servers:
                                     - url: "http://espresso:8772"
+
+            TRAEFIK_CONFIG_ESPRESSO_READER: |
+                http:
+                    routers:
+                        espresso-reader:
+                            rule: "PathPrefix(`/espresso/reader`)"
+                            middlewares:
+                                - "remove-espresso-reader-prefix"
+                            service: espresso-reader
+                    middlewares:
+                        remove-espresso-reader-prefix:
+                            replacePathRegex:
+                                regex: "^/espresso/reader/(.*)"
+                                replacement: "/$1"
+                    services:
+                        espresso-reader:
+                            loadBalancer:
+                                servers:
+                                    - url: "http://espresso_reader:8081"
