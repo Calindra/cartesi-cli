@@ -33,7 +33,7 @@ services:
             DATABASE_URL: postgres://postgres:password@database:5432/espresso_reader
 
     espresso_reader:
-        image: cartesi/sdk:devel
+        image: cartesi/sdk:0.12.0-alpha.6
         command: "cartesi-rollups-espresso-reader"
         depends_on:
             espresso_reader_migrate:
@@ -49,7 +49,7 @@ services:
             ESPRESSO_STARTING_BLOCK: 101
 
     espresso:
-        image: cartesi/sdk:0.12.0-alpha.5
+        image: cartesi/sdk:0.12.0-alpha.6
         command: ["/usr/local/bin/espresso-dev-node"]
         healthcheck:
             test:
