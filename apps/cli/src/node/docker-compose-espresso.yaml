@@ -17,21 +17,21 @@ services:
             CARTESI_FEATURE_INPUT_READER_ENABLED: false
 
     espresso_reader_migrate:
-        image: golang:1.23
+        image: cartesi/sdk:0.12.0-alpha.6
         command:
             - /bin/bash
             - -c
             - |
-                git clone --depth 1 https://github.com/cartesi/rollups-espresso-reader.git --branch v0.2.1-node-20250128
-                cd rollups-espresso-reader
-                make migrate
+                #FIXME: this binary should be provided by the cartesi/sdk
+                curl -fsSL https://github.com/Calindra/rollups-espresso-reader/releases/download/v2.0.1-test/espresso-db-migration \
+                     -o /usr/local/bin/espresso-db-migration
+                chmod +x /usr/local/bin/espresso-db-migration
+                espresso-db-migration
         env_file:
             - ${CARTESI_BIN_PATH}/node/default.env
         depends_on:
             database:
                 condition: service_healthy
-        environment:
-            DATABASE_URL: postgres://postgres:password@database:5432/espresso_reader
 
     espresso_reader:
         image: cartesi/sdk:0.12.0-alpha.6
